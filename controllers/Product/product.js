@@ -1,5 +1,6 @@
 const Product = require("../../model/Product/product");
 const Include = require("../../model/Product/include");
+const Nutrition = require("../../model/Product/nutrition");
 const ProductSize = require("../../model/Product/productsize");
 
 
@@ -7,7 +8,7 @@ const Trycatch = require("../../middleware/Trycatch");
 const ApiFeatures = require("../../utils/apifeature");
 
 const CreateProduct = Trycatch(async (req, res, next) => {
-  const { price, discountPercentage, productSizes } = req.body;
+  const { price, discountPercentage, productSizes,productNuturitions } = req.body;
   const { deliverables } = req.body;
   
   let product;
@@ -27,6 +28,17 @@ const CreateProduct = Trycatch(async (req, res, next) => {
         productId: product._id,
       });
       
+    }
+  }
+  // Nutrition
+  if (productNuturitions && productNuturitions.length > 0) {
+    for (let nutrition of productNuturitions) {
+      const productNutrition = await Nutrition.create({
+        ...nutrition,
+        productId: product._id,
+        nutrition : nutrition.name,
+        value : nutrition.value
+      });
     }
   }
    // Add deliverables
@@ -103,10 +115,10 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
 
   const features = new ApiFeatures(Product.find(), req.query)
     .search()
-    // .filterByPriceRange(minPrice, maxPrice)
-    // .filterByCategory(category)
-    // .filterByStock(IsOutOfStock)
-    // .filterByproductType(productType);
+    .filterByPriceRange(minPrice, maxPrice)
+    .filterByCategory(category)
+    .filterByStock(IsOutOfStock)
+    .filterByproductType(productType);
 
   // Get all matching products first (without pagination)
   const allMatchingProducts = await features.query.clone(); // clone() to prevent modifying the original query
@@ -145,11 +157,13 @@ const GetSingleProduct = Trycatch(async (req, res, next) => {
   // send all Include
   const sizes = await ProductSize.find({ productId: product._id });
   const include = await Include.find({ productId: req.params.id })
+  const productNuturitions = await Nutrition.find({ productId: req.params.id })
   res.status(200).json({
     success: true,
     include,
     product,
-    sizes
+    sizes,
+    productNuturitions
   });
 });
 
@@ -167,7 +181,6 @@ const UpdateProduct = Trycatch(async (req, res, next) => {
   );
   const productSizes = await ProductSize.find({ productId: updatedProduct._id });
   const allSizesOutOfStock = productSizes.every(size => size.IsOutOfStock === "true");
-
   updatedProduct.IsOutOfStock = allSizesOutOfStock ? "true" : "false";
 
   // Check if quantity is greater than 0
