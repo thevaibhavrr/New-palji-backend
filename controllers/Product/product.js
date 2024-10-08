@@ -115,10 +115,10 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
 
   const features = new ApiFeatures(Product.find(), req.query)
     .search()
-    .filterByPriceRange(minPrice, maxPrice)
     .filterByCategory(category)
-    .filterByStock(IsOutOfStock)
-    .filterByproductType(productType);
+    // .filterByPriceRange(minPrice, maxPrice)
+    // .filterByStock(IsOutOfStock)
+    // .filterByproductType(productType);
 
   // Get all matching products first (without pagination)
   const allMatchingProducts = await features.query.clone(); // clone() to prevent modifying the original query
@@ -126,6 +126,8 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
   // Count the total number of matching products
   const totalMatchingProducts = allMatchingProducts.length;
 
+  console.log("--2");
+  console.log(totalMatchingProducts);
   // Apply pagination
   features.paginate(resultPerPage);
 
