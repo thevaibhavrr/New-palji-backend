@@ -88,21 +88,21 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   }
 
   // Send mail for out of stock products
-  if (outOfStockProducts.length > 0) {
-    let outOfStockMessage =
-      "<p>Some products are out of stock. Please update your inventory:</p><ul>";
-    outOfStockProducts.forEach((product) => {
-      outOfStockMessage += `<li>${product.name}</li><img loading="lazy" src="${product.thumbnail}" alt="${product.name}" style="max-width: 100px;">`;
-    });
-    outOfStockMessage += "</ul>";
+  // if (outOfStockProducts.length > 0) {
+  //   let outOfStockMessage =
+  //     "<p>Some products are out of stock. Please update your inventory:</p><ul>";
+  //   outOfStockProducts.forEach((product) => {
+  //     outOfStockMessage += `<li>${product.name}</li><img loading="lazy" src="${product.thumbnail}" alt="${product.name}" style="max-width: 100px;">`;
+  //   });
+  //   outOfStockMessage += "</ul>";
 
-    Mail(
-      "vaibhavrathorema@gmail.com",
-      "Out of Stock Products Alert",
-      outOfStockMessage,
-      true
-    );
-  }
+  //   Mail(
+  //     "vaibhavrathorema@gmail.com",
+  //     "Out of Stock Products Alert",
+  //     outOfStockMessage,
+  //     true
+  //   );
+  // }
 
   res.status(201).json({
     success: true,
