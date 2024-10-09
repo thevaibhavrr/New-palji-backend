@@ -25,6 +25,7 @@ Product.route("/delete-product/:id").delete(auth.IsAuthenticateUser,auth.authori
 
 
 // Nutrition
+Product.route("/add-nutrition").post(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,Nutrition.CreateNutrition)
 Product.route("/update-nutrition/:id").put(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,Nutrition.UpdateNutrition)
 Product.route("/delete-nutrition/:id").delete(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,Nutrition.DeleteNutrition)
 Product.route("/get-all-nutritions").get(Nutrition.GetAllNutrition)

@@ -114,7 +114,7 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
 
  
   // result per page
-  const resultPerPage = 50;
+  const resultPerPage = perPageData ? perPageData : 50;
 
   let features = new ApiFeatures(Product.find(), req.query)
     .search()
