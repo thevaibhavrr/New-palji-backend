@@ -1,6 +1,18 @@
 const Productsize = require("../../model/Product/productsize") 
 const Product = require("../../model/Product/product");
 const Trycatch = require("../../middleware/Trycatch");
+
+
+
+// create product
+const CreateProductsize = Trycatch(async (req, res, next) => {
+  const productsize = await Productsize.create(req.body);
+  res.status(201).json({
+    success: true,
+    productsize,
+  });
+});
+
 // update product
 const UpdateProductsize = Trycatch(async (req, res, next) => {
   const productsize = await Productsize.findByIdAndUpdate(req.params.id, req.body, {
@@ -45,4 +57,4 @@ const UpdateProductsize = Trycatch(async (req, res, next) => {
     });
   });
 
-module.exports = {UpdateProductsize,DeleteProductsize}
+module.exports = {UpdateProductsize,DeleteProductsize , CreateProductsize }

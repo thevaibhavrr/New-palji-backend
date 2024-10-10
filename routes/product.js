@@ -7,6 +7,7 @@ const ProductSize = require("../controllers/Product/Productsize");
 const Nutrition = require("../controllers/Product/nutritioncontroller");
 
 // ProductSize
+Product.route("/add-productsize").post(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,ProductSize.CreateProductsize)
 Product.route("/update-productsize/:id").put(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,ProductSize.UpdateProductsize)
 Product.route("/delete-productsize/:id").delete(auth.IsAuthenticateUser,auth.authorizeRole("admin") ,ProductSize.DeleteProductsize)
 
