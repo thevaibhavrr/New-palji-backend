@@ -6,6 +6,8 @@ const Trycatch = require("../../middleware/Trycatch");
 
 // create product
 const CreateProductsize = Trycatch(async (req, res, next) => {
+  console.log("111" , req.body )
+
   const productsize = await Productsize.create(req.body);
   res.status(201).json({
     success: true,
