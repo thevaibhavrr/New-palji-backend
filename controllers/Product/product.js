@@ -96,7 +96,6 @@ const GetAllProductsForAdmin = Trycatch(async (req, res, next) => {
   });
 });
 
-
 const GetAllProducts = Trycatch(async (req, res, next) => {
   const perPageData = req.query.perPage;
   let { minPrice, maxPrice } = req.query;
@@ -104,7 +103,7 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
   let IsOutOfStock = req.query.IsOutOfStock;
   let productType = req.query.productType;
   const nameSearch = req.query.name;
-  
+
   category = category ? category : "";
   IsOutOfStock = IsOutOfStock ? IsOutOfStock : "";
 
@@ -112,37 +111,29 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
   minPrice = minPrice ? Number(minPrice) : 0;
   maxPrice = maxPrice ? Number(maxPrice) : 1000000000;
 
- 
-  // result per page
+  // Result per page
   const resultPerPage = perPageData ? perPageData : 50;
 
   let features = new ApiFeatures(Product.find(), req.query)
     .search()
     .filterByCategory(category)
-    .filterByStock(IsOutOfStock);
+    // .filterByStock(IsOutOfStock);
 
-  // Conditionally add filterByproductType
+  // Conditionally add filterByProductType
   if (productType) {
     features = features.filterByProductType(productType);
   }
 
-  // Add filtering logic for first size's FinalPrice between 150 and 300
-  const productSizeFilter = await ProductSize.aggregate([
-    {
-      $match: {
-        FinalPrice: { $gte: minPrice, $lte: maxPrice }  // FinalPrice between 150 and 300
-      }
-    },
-    {
-      $group: {
-        _id: "$productId", 
-        firstSize: { $first: "$FinalPrice" }
-      }
-    }
-  ]).then(results => results.map(result => result._id));
+  // Get all products that fall within price range
+  const productsWithinPriceRange = await Product.find({
+    PriceAfterDiscount: { $gte: minPrice, $lte: maxPrice },
+  });
 
-  // Ensure only products with a matching size are included
-  features.query = features.query.where('_id').in(productSizeFilter);
+  // Collect all product IDs for filtering
+  const productIds = productsWithinPriceRange.map(product => product._id);
+
+  // Ensure the query includes all products, not just those with sizes
+  features.query = features.query.where('_id').in(productIds);
 
   let totalProductsCount;
   let filter = {};
@@ -176,14 +167,13 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
     .populate("category");
 
   const Allproducts = await features.query;
-
+ 
   const products = await Promise.all(
     Allproducts.map(async (product) => {
       const size = await ProductSize.find({ productId: product._id });
       return { ...product._doc, size };
     })
   );
-
 
   res.status(200).json({
     resultPerPage,
@@ -192,53 +182,102 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
     products: products.reverse(),
   });
 });
+
 // const GetAllProducts = Trycatch(async (req, res, next) => {
 //   const perPageData = req.query.perPage;
 //   let { minPrice, maxPrice } = req.query;
 //   let category = req.query.category;
 //   let IsOutOfStock = req.query.IsOutOfStock;
 //   let productType = req.query.productType;
+//   const nameSearch = req.query.name;
+  
 //   category = category ? category : "";
 //   IsOutOfStock = IsOutOfStock ? IsOutOfStock : "";
 
-//   // result per page
-//   const resultPerPage = perPageData ? perPageData : 10000;
-//   // price
-//   minPrice = minPrice ? minPrice : 0;
-//   maxPrice = maxPrice ? maxPrice : 1000000000;
+//   // Ensure minPrice and maxPrice are numbers
+//   minPrice = minPrice ? Number(minPrice) : 0;
+//   maxPrice = maxPrice ? Number(maxPrice) : 1000000000;
 
-//   const features = new ApiFeatures(Product.find(), req.query)
+ 
+//   // result per page
+//   const resultPerPage = perPageData ? perPageData : 50;
+
+//   let features = new ApiFeatures(Product.find(), req.query)
 //     .search()
 //     .filterByCategory(category)
-//     // .filterByPriceRange(minPrice, maxPrice)
-//     // .filterByStock(IsOutOfStock)
-//     // .filterByproductType(productType);
+//     .filterByStock(IsOutOfStock);
 
-//   // Get all matching products first (without pagination)
-//   const allMatchingProducts = await features.query.clone(); // clone() to prevent modifying the original query
+//   // Conditionally add filterByproductType
+//   if (productType) {
+//     features = features.filterByProductType(productType);
+//   }
 
-//   // Count the total number of matching products
-//   const totalMatchingProducts = allMatchingProducts.length;
+//   // Add filtering logic for first size's FinalPrice between 150 and 300
+//   const productSizeFilter = await ProductSize.aggregate([
+//     {
+//       $match: {
+//         FinalPrice: { $gte: minPrice, $lte: maxPrice }  // FinalPrice between 150 and 300
+//       }
+//     },
+//     {
+//       $group: {
+//         _id: "$productId", 
+//         firstSize: { $first: "$FinalPrice" }
+//       }
+//     }
+//   ]).then(results => results.map(result => result._id));
 
-//   console.log("--2");
-//   console.log(totalMatchingProducts);
-//   // Apply pagination
-//   features.paginate(resultPerPage);
+//   // Ensure only products with a matching size are included
+//   features.query = features.query.where('_id').in(productSizeFilter);
 
-//   // Fetch the paginated products
-//   const paginatedProducts = await features.query;
+//   let totalProductsCount;
+//   let filter = {};
 
-//   // Reverse the order of the products
-//   const products = paginatedProducts.reverse();
+//   if (nameSearch) {
+//     totalProductsCount = 0;
+//   } else {
+//     if (category) {
+//       filter.category = category;
+//     }
+//     if (minPrice !== undefined || maxPrice !== undefined) {
+//       filter.PriceAfterDiscount = {
+//         ...(minPrice !== undefined && { $gte: minPrice }),
+//         ...(maxPrice !== undefined && { $lte: maxPrice }),
+//       };
+//     }
+
+//     if (Object.keys(filter).length > 0) {
+//       totalProductsCount = await Product.countDocuments(filter);
+//     } else {
+//       totalProductsCount = await Product.countDocuments();
+//     }
+
+//     features = features.paginate(resultPerPage);
+//   }
+
+//   features.query
+//     .select(
+//       "name price PriceAfterDiscount discountPercentage quantity thumbnail category IsOutOfStock productType description"
+//     )
+//     .populate("category");
+
+//   const Allproducts = await features.query;
+
+//   const products = await Promise.all(
+//     Allproducts.map(async (product) => {
+//       const size = await ProductSize.find({ productId: product._id });
+//       return { ...product._doc, size };
+//     })
+//   );
+
 
 //   res.status(200).json({
 //     resultPerPage,
 //     success: true,
-//     totalProducts: totalMatchingProducts, // Return the total number of matching products
-//     products,
+//     totalProducts: totalProductsCount,
+//     products: products.reverse(),
 //   });
 // });
-
 
 // get single product
 const GetSingleProduct = Trycatch(async (req, res, next) => {
