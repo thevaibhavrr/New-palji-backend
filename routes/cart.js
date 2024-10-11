@@ -5,11 +5,10 @@ const auth = require("../middleware/Auth");
 
 // get cart
 Cart.route("/my-cart").get(auth.IsAuthenticateUser, Data.GetCart);
-Cart.route("/apply-coupon").post(auth.IsAuthenticateUser, Data.ApplyCoupon);
+Cart.route("/apply-coupon").post(Data.ApplyCoupon);
 
 // RemoveCoupon
-Cart.route("/remove-coupon").post(auth.IsAuthenticateUser, Data.RemoveCoupon);
-
+Cart.route("/remove-coupon").post( Data.RemoveCoupon);
 
 // add to cart
 Cart.route("/add-to-cart").post(auth.IsAuthenticateUser, Data.addToCart);

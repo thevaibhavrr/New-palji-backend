@@ -6,8 +6,6 @@ const Trycatch = require("../../middleware/Trycatch");
 
 // create product
 const CreateProductsize = Trycatch(async (req, res, next) => {
-  console.log("111" , req.body )
-
   const productsize = await Productsize.create(req.body);
   res.status(201).json({
     success: true,
@@ -20,8 +18,8 @@ const UpdateProductsize = Trycatch(async (req, res, next) => {
   const productsize = await Productsize.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
-  });
-
+  }); 
+  
   // Check if the product size quantity is more than 0
   if (productsize.quantity > 0) {
     productsize.IsOutOfStock = "false";

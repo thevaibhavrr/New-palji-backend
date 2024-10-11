@@ -205,7 +205,7 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
   let features = new ApiFeatures(Product.find(), req.query)
     .search()
     .filterByCategory(category)
-    .filterByStock(IsOutOfStock);
+    // .filterByStock(IsOutOfStock);
 
   // Conditionally add filterByproductType
   if (productType) {

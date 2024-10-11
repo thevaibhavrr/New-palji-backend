@@ -27,39 +27,10 @@ const cartSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "productsize",
       },
-      // Iscoupanapplie: {
-      //   type: Boolean,
-      //   default: false,
-      // },
-      // Coupan: {
-      //   type: String,
-      // },
-      // CoupandiscountPercentage: {
-      //   type: Number,
-      // },
-      // if coupan applied then
-      // PorudctpricebeforeapplyCoupan: {
-      //   type: Number,
-      // }
+    
     },
   ],
 
-  // taxPrice: {
-  //   type: Number,
-  //   required: true,
-  //   default: 1.05, // 5% tax
-  // },
-  // priceAfterAddingTax: {
-  //   type: Number,
-  // },
-  // TotalProductPrice: {
-  //   type: String,
-  // },
-  // shippingPrice: {
-  //   type: Number,
-  //   required: true,
-  //   default: 0.0,
-  // },
   totalPrice: {
     type: Number,
     required: true,
@@ -79,22 +50,17 @@ const cartSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  // Iscoupanapplied: {
-  //   type: String,
-  //   default: "false",
-  // },
-  // CoupanCode: {
-  //   type: String,
-  // },
-  // CoupanDiscount:{
-  //   type:Number
-  // },
-  // priceafterAddingMinimumOrderValueCoupan:{
-  //   type:Number
-  // },
-  activecart: {
+   activecart: {
     type: String,
     default: "true",
+  },
+  coupancode: {
+    type: String,
+    default : ""
+  },
+  couapnDiscount: {
+    type: Number,
+    default : 0
   }
 
 });

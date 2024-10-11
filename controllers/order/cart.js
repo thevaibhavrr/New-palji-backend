@@ -4,72 +4,9 @@ const Product = require("../../model/Product/product");
 const Coupon = require("../../model/coupan/coupan");
 const Productsize = require("../../model/Product/productsize");
 
-const RemoveCoupon = TryCatch(async (req, res) => {
-  const userId = req.user.id;
-  // Find the cart for the logged-in user
-  let cart = await Cart.findOne({ userId, activecart: "true" });
-
-  if (!cart) {
-    return res.status(400).json({
-      success: false,
-      message: "Cart not found for the user.",
-    });
-  }
-
-  try {
-    // Remove coupon data from cart items
-    for (const orderItem of cart.orderItems) {
-      if (orderItem.Iscoupanapplie) {
-        // Reset coupon-related fields
-        orderItem.Iscoupanapplie = false;
-        orderItem.Coupan = "";
-        orderItem.CoupanDiscountPercentage = 0;
-        orderItem.CoupanDiscountPrice = 0;
-        orderItem.PorudctpricebeforeapplyCoupan =
-          orderItem.quantity * orderItem.singleProductPrice;
-      }
-    }
-
-    // Recalculate total prices after removing the coupon
-    let totalPrice = 0;
-    for (const orderItem of cart.orderItems) {
-      // Update totalPrice based on singleProductPrice and quantity
-      orderItem.totalPrice = orderItem.quantity * orderItem.singleProductPrice;
-      totalPrice += orderItem.totalPrice;
-    }
-
-    const priceAfterAddingTax = totalPrice * 1.05;
-    const totalPriceWithShipping = priceAfterAddingTax + cart.shippingPrice;
-
-    // Update cart total prices
-    cart.TotalProductPrice = totalPrice;
-    cart.totalPrice = totalPriceWithShipping;
-    cart.Iscoupanapplied = "false";
-
-    // Save the updated cart
-    await cart.save();
-
-    // Send success response with updated cart
-    res.status(200).json({
-      success: true,
-      message: "Coupon removed successfully.",
-      cart,
-    });
-  } catch (error) {
-    // Handle errors when removing coupon
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
 const addToCart = TryCatch(async (req, res, next) => {
   try {
-    const {
-      productId,
-      quantity,
-      selectProductSize,
-    } = req.body;
+    const { productId, quantity, selectProductSize } = req.body;
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(400).json({
@@ -115,7 +52,8 @@ const addToCart = TryCatch(async (req, res, next) => {
 
     // Calculate total price considering coupons
     const processedOrderItems = await calculateTotalPriceWithCoupons(
-      cart.orderItems );
+      cart.orderItems
+    );
     // Calculate total product price
     const totalProductPrice = processedOrderItems.reduce(
       (total, item) => total + item.totalPrice,
@@ -125,17 +63,10 @@ const addToCart = TryCatch(async (req, res, next) => {
       (total, item) => total + item.WithOurDiscount,
       0
     );
-    // Calculate price after adding tax (5%) tax
-    // const priceAfterAddingTax = totalProductPrice * (1 + (18 / 100)) ;
-    // const totalPriceWithShipping = priceAfterAddingTax + shippingPrice;
-
     // Update the existing cart with new details
     cart.orderItems = processedOrderItems;
     cart.totalPriceWithoutDiscount = PriceWithoutDiscount;
     cart.totalPrice = totalProductPrice;
-    // cart.taxPrice = 1.05;
-    // cart.priceAfterAddingTax = priceAfterAddingTax;
-    // cart.totalPrice = totalPriceWithShipping;
 
     // Save the updated cart to the database
     await cart.save();
@@ -153,11 +84,10 @@ const addToCart = TryCatch(async (req, res, next) => {
 async function calculateTotalPriceWithCoupons(orderItems) {
   const processedItems = [];
 
-
   for (const orderItem of orderItems) {
     const product = await Product.findById(orderItem.productId);
     const productsize = await Productsize.findById(orderItem.size);
-    
+
     const itemTotalPrice = orderItem.quantity * productsize.FinalPrice;
     const WithOurDiscount = orderItem.quantity * productsize.price;
 
@@ -166,101 +96,14 @@ async function calculateTotalPriceWithCoupons(orderItems) {
       quantity: orderItem.quantity,
       totalPrice: itemTotalPrice,
       singleProductPrice: productsize.FinalPrice,
-      // size: `${productsize.size} ${productsize.sizetype} `/,
       size: orderItem.size,
       WithOurDiscount: WithOurDiscount,
-      // Iscoupanapplie: false,
-      // Coupan:  "",
-      // CoupanDiscountPercentage: orderItem.CoupanDiscountPercentage || 0,
-      // CoupanDiscountPrice: orderItem.CoupanDiscountPrice || 0,
-      // PorudctpricebeforeapplyCoupan: 0,
     });
   }
-
-
 
   return processedItems;
 }
 
-const checkCouponApplicability = async (Reqcoupon, product) => {
-  // Get coupon details
-  const coupon = await Coupon.findOne({
-    Coupancode: Reqcoupon,
-    Isexpired: false,
-  });
-  if (!coupon) {
-    throw new Error("Invalid or expired coupon code");
-  }
-  switch (coupon.coupanfor) {
-    case "all":
-      return true;
-    case "product":
-      return coupon.applicableProducts.includes(product._id);
-    case "category":
-      return coupon.applicableCategories.includes(product.category);
-    case "minimumOrderValue":
-      return false;
-    default:
-      return false;
-  }
-};
-
-const ApplyCoupon = TryCatch(async (req, res) => {
-  const { CoupanCode } = req.body;
-  const userId = req.user.id;
-
-  // Find the cart for the logged-in user
-  let cart = await Cart.findOne({ userId, activecart: "true" });
-
-  if (!cart) {
-    return res.status(400).json({
-      success: false,
-      message: "Cart not found for the user.",
-    });
-  }
-
-  try {
-    // Check if the coupon code is applicable to the cart items
-    const processedItems = await calculateTotalPriceWithCoupons(
-      cart.orderItems    );
-
-    // Update the cart with the processed items
-    cart.orderItems = processedItems;
-
-    // Calculate total product price
-    const totalProductPrice = processedItems.reduce(
-      (total, item) => total + item.totalPrice,
-      0
-    );
-
-    // Calculate price after adding tax (5%) tax
-    const priceAfterAddingTax = totalProductPrice * 1.05;
-
-    // Update cart details
-    cart.taxPrice = 1.05;
-    cart.shippingPrice = 0; // Assuming shipping is free
-    cart.totalPrice = priceAfterAddingTax;
-    cart.Iscoupanapplied = true; // Assuming you want to mark if a coupon is applied
-
-    // Save the updated cart
-    await cart.save();
-
-    // Send success response with updated cart
-    res.status(200).json({
-      success: true,
-      message: "Coupon applied successfully.",
-      cart,
-    });
-  } catch (error) {
-    // Handle errors when applying coupon
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
-// get cart
 const GetCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.user.id, activecart: "true" })
@@ -294,7 +137,7 @@ const GetCart = async (req, res) => {
 
 const RemoveFromCart = TryCatch(async (req, res) => {
   const { productId, selectProductSize } = req.body;
- 
+
   const userId = req.user.id;
   try {
     // Find the cart for the logged-in user
@@ -314,7 +157,6 @@ const RemoveFromCart = TryCatch(async (req, res) => {
       );
     });
 
-  
     // Decrease the quantity of the product in the cart
     cart.orderItems[productIndex].quantity -= 1;
 
@@ -325,7 +167,8 @@ const RemoveFromCart = TryCatch(async (req, res) => {
 
     // Recalculate cart details
     const processedItems = await calculateTotalPriceWithCoupons(
-      cart.orderItems    );
+      cart.orderItems
+    );
 
     const totalProductPrice = processedItems.reduce(
       (total, item) => total + item.totalPrice,
@@ -361,7 +204,7 @@ const RemoveFromCart = TryCatch(async (req, res) => {
 
 // Controller function to remove a complete product from the cart
 const DeleteProductFromCart = TryCatch(async (req, res) => {
-  const { productId, selectProductSize , productQuantity } = req.body;
+  const { productId, selectProductSize, productQuantity } = req.body;
   const userId = req.user.id;
   try {
     // Find the cart for the logged-in user
@@ -381,7 +224,6 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
       );
     });
 
-  
     // Decrease the quantity of the product in the cart
     cart.orderItems[productIndex].quantity -= productQuantity;
 
@@ -392,7 +234,8 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
 
     // Recalculate cart details
     const processedItems = await calculateTotalPriceWithCoupons(
-      cart.orderItems    );
+      cart.orderItems
+    );
 
     const totalProductPrice = processedItems.reduce(
       (total, item) => total + item.totalPrice,
@@ -426,13 +269,85 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
   }
 });
 
+// couapn section
+const ApplyCoupon = TryCatch(async (req, res) => {
+  const { coupon } = req.body;
+
+  const couapnFind = await Coupon.findOne({ Coupancode: coupon });
+
+  if (!couapnFind) {
+    return res.status(400).json({
+      success: false,
+      message: "Coupon not found.",
+    });
+  }
+  const cart = await Cart.findOne({
+    userId: req.user.id,
+    activecart: "true",
+  });
+  const couponDiscountPercentage = await couapnFind.discountPercentage;
+  const cartTotalPrice = cart.totalPrice;
+
+  // Calculate
+  const discountAmount = (cartTotalPrice * couponDiscountPercentage) / 100;
+  const priceAfterCouponDiscount = cartTotalPrice - discountAmount;
+
+  // update cart
+  cart.totalPrice = priceAfterCouponDiscount;
+  cart.coupancode = coupon;
+  cart.couapnDiscount = discountAmount;
+
+  await cart.save();
+
+  res.json({
+    message: "coupon applied successfully",
+    discountAmount,
+    priceAfterCouponDiscount,
+    cart,
+  });
+});
+
+const RemoveCoupon = TryCatch(async (req, res) => {
+  const cart = await Cart.findOne({
+    userId: req.user.id,
+    activecart: "true",
+  });
+
+  if (!cart) {
+    return res.status(404).json({
+      success: false,
+      message: "Cart not found.",
+    });
+  }
+
+  // Check if a coupon is applied
+  if (!cart.coupancode) {
+    return res.status(400).json({
+      success: false,
+      message: "No coupon applied to remove.",
+    });
+  }
+
+  const originalTotalPrice = cart.totalPrice + cart.couapnDiscount;
+
+  cart.couapnDiscount = 0;
+  cart.coupancode = "";
+  cart.totalPrice = originalTotalPrice;
+
+  await cart.save();
+
+  res.json({
+    message: "Coupon removed successfully",
+    cart,
+  });
+});
 
 // export
-module.exports = { 
+module.exports = {
   addToCart,
   GetCart,
   RemoveFromCart,
   ApplyCoupon,
   RemoveCoupon,
-  DeleteProductFromCart
+  DeleteProductFromCart,
 };
