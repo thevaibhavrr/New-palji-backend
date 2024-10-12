@@ -11,7 +11,6 @@ const RazorpayData = require("../order/razorpay/razorpayController");
 
 const CreateSecondOrder = TryCatch(async (req, res, next) => {
   const userId = req.user.id;
-  console.log("-1")
   const { CartId, paymentMethod, paymentId, paymentorderCratedAt,currency ,paymentDoneAt,DeviceType } = req.body;
 
   // Create the second order
@@ -41,6 +40,12 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   const userEmail = req.user.email;
   const orderDetails = generateOrderDetails(cart);
   const orderTotal = calculateOrderTotal(cart);
+
+  Mail(
+    req.user.email,
+    "Order Placed Successfully",
+    `Congratulations, your order has been placed successfully. Your order details: ${orderDetails} Total amount: ${orderTotal}`
+  );
 
   // Update product quantities and check for out of stock
   const updatedProducts = [];
@@ -117,6 +122,7 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
 function generateOrderDetails(cart) {
   let detailsHtml = "";
   cart.orderItems.forEach((item) => {
+    console.log("---------------------------=",item);
     detailsHtml += `
       <div class="order-item" style="display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1x solid  rgba(60, 60, 60, 0.735); border-radius: 10px;  background-color: #f2f2f2; width: 100%; ">
         <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="max-width: 100px; margin-right: 20px;">

@@ -28,7 +28,7 @@ const RegisterUser = Trycatch(async (req, res, next) => {
   const logoUrl = "https://paliji-admin.vercel.app/static/media/logo.749613bd9100ee0b9f00.png";
   const shopName = "Palji Bakery";
   const yourLoginPageUrl = "https://palji-bakeryy.vercel.app/Signup"
-
+ 
   // Email content
   const emailContent = `
     <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f7f7f7;">
@@ -206,27 +206,74 @@ const generateOTP = () => {
 var OTPs = {};
 
 // send otp and update password
-const ForgotPassword = Trycatch(async (req, res, next) => {
+// const ForgotPassword = Trycatch(async (req, res, next) => {
+//   const { email } = req.body;
+//   const user = await User.findOne({ email });
+//   // check user us exist or not
+//   if (!user) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "User not found",
+//     });
+//   }
+//   // generate otp
+//   const OTP = generateOTP();
+//   OTPs[email] = OTP;
+
+//   // send otp
+//   try {
+//     await Mail(
+//       email,
+//       "Password Reset OTP",
+//       `Your OTP for resetting the password is: ${OTP}. Please do not share this OTP with anyone.`
+//     );
+//     res.status(200).json({
+//       success: true,
+//       message: "OTP sent to your email",
+//     });
+//   } catch (error) {
+//     console.error("Error sending OTP:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to send OTP",
+//     });
+//   }
+// });
+const ForgotPassword = Trycatch(async (req, res, next) => { 
   const { email } = req.body;
   const user = await User.findOne({ email });
-  // check user us exist or not
+
+  // Check if user exists
   if (!user) {
     return res.status(404).json({
       success: false,
       message: "User not found",
     });
   }
-  // generate otp
+
+  // Generate OTP
   const OTP = generateOTP();
   OTPs[email] = OTP;
 
-  // send otp
+  // Email content
+  const logoUrl = "https://paliji-admin.vercel.app/static/media/logo.749613bd9100ee0b9f00.png";
+  const shopName = "Palji Bakery";
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+      <img src="${logoUrl}" alt="${shopName} Logo" style="width: 150px; height: auto; margin-bottom: 20px;">
+      <h2 style="color: #333;">Welcome to ${shopName}!</h2>
+      <p style="font-size: 16px; color: #555;">Your OTP is: <strong style="font-size: 24px; color: #28a745;">${OTP}</strong>.</p>
+      <p style="font-size: 16px; color: #555;">Please do not share this OTP with anyone.</p>
+      <p style="font-size: 14px; color: #999;">This OTP is valid for a short period. Please use it promptly.</p>
+      <footer style="margin-top: 20px; font-size: 12px; color: #999;">
+        <p>Thank you for choosing ${shopName}!</p>
+      </footer>
+    </div>
+  `;
+
+  // Send OTP
   try {
-    await Mail(
-      email,
-      "Password Reset OTP",
-      `Your OTP for resetting the password is: ${OTP}. Please do not share this OTP with anyone.`
-    );
+    await Mail(email, "Password Reset OTP", emailContent);
     res.status(200).json({
       success: true,
       message: "OTP sent to your email",
@@ -240,6 +287,7 @@ const ForgotPassword = Trycatch(async (req, res, next) => {
   }
 });
 
+ 
 // check otp
 const checkOTP = Trycatch(async (req, res, next) => {
   const { email, OTP } = req.body;
