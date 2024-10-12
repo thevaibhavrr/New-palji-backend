@@ -44,7 +44,9 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   Mail(
     req.user.email,
     "Order Placed Successfully",
-    `Congratulations, your order has been placed successfully. Your order details: ${orderDetails} Total amount: ${orderTotal}`
+    `Congratulations, your order has been placed successfully. Your order details: ${orderDetails} Total amount: ${orderTotal}`,
+    isHTML = true
+
   );
 
   // Update product quantities and check for out of stock
@@ -119,28 +121,51 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   });
 });
 
+// function generateOrderDetails(cart) {
+//   let detailsHtml = "";
+//   cart.orderItems.forEach((item) => {
+//     detailsHtml += `
+//       <div class="order-item" style="display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1x solid  rgba(60, 60, 60, 0.735); border-radius: 10px;  background-color: #f2f2f2; width: 100%; ">
+//         <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="max-width: 100px; margin-right: 20px;">
+//         <div class="order-item-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: space-between; width: 100%;  ">
+//         <div style="width: 100%;">
+//         <h4 style="margin: 0; font-size: 16px; color: #000;">${item.productId.name}</h4>
+//         <p style="margin: 5px 0; color: #555;">Quantity: ${item.quantity}</p>
+//         </div>
+//         <div style="width: 30%;" >
+//         <p style="margin: 5px 0; color: #555;">Price: ₹${item.singleProductPrice}</p>
+//         </div>
+//         </div>
+//       </div>
+//       <br/> 
+//     `;
+//   });
+//   return detailsHtml;
+// }
 function generateOrderDetails(cart) {
   let detailsHtml = "";
+  console.log(cart);
   cart.orderItems.forEach((item) => {
-    console.log("---------------------------=",item);
+    console.log(item);
     detailsHtml += `
-      <div class="order-item" style="display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1x solid  rgba(60, 60, 60, 0.735); border-radius: 10px;  background-color: #f2f2f2; width: 100%; ">
+      <div class="order-item" style="display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1px solid rgba(60, 60, 60, 0.735); border-radius: 10px; background-color: #f2f2f2; width: 100%;">
         <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="max-width: 100px; margin-right: 20px;">
-        <div class="order-item-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: space-between; width: 100%;  ">
-        <div style="width: 100%;">
-        <h4 style="margin: 0; font-size: 16px; color: #000;">${item.productId.name}</h4>
-        <p style="margin: 5px 0; color: #555;">Quantity: ${item.quantity}</p>
-        </div>
-        <div style="width: 30%;" >
-        <p style="margin: 5px 0; color: #555;">Price: ₹${item.singleProductPrice}</p>
-        </div>
+        <div class="order-item-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: space-between; width: 100%;">
+          <div style="width: 100%;">
+            <h4 style="margin: 0; font-size: 16px; color: #000;">${item.productId.name}</h4>
+            <p style="margin: 5px 0; color: #555;">Quantity: ${item.quantity}</p>
+          </div>
+          <div style="width: 30%;">
+            <p style="margin: 5px 0; color: #555;">Price: ₹${item.singleProductPrice}</p>
+          </div>
         </div>
       </div>
-      <br/> 
+      <br/>
     `;
   });
   return detailsHtml;
 }
+
 
 function calculateOrderTotal(cart) {
   return cart.orderItems.reduce(
