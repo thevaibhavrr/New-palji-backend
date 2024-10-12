@@ -184,10 +184,10 @@ const RemoveFromCart = TryCatch(async (req, res) => {
     cart.totalPriceWithoutDiscount = PriceWithoutDiscount;
     cart.totalPrice = totalProductPrice;
     if (cart.orderItems.length === 0) {
-      cart.coupancode = "";  
-      cart.couapnDiscount = 0; 
+      cart.coupancode = "";
+      cart.couapnDiscount = 0;
       cart.totalPrice = 0;
-      cart.activecart = false;  
+      cart.activecart = false;
     }
 
     // Save the updated cart
@@ -275,43 +275,142 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
   }
 });
 
-// couapn section 
+// couapn section
+// const ApplyCoupon = TryCatch(async (req, res) => {
+//   const { coupon } = req.body;
+
+//   const couapnFind = await Coupon.findOne({ Coupancode: coupon });
+
+//   const currentDate = new Date();
+//   const startDate = new Date(couapnFind.startDate);
+//   const endDate = new Date(couapnFind.endDate);
+
+//   if (!couapnFind) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Coupon not found.",
+//     });
+//   }
+
+//   if (currentDate < startDate || currentDate > endDate) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Coupon is expired or not valid at this time.",
+//     });
+//   }
+
+//   const cart = await Cart.findOne({
+//     userId: req.user.id,
+//     activecart: "true",
+//   });
+
+//   const couponDiscountPercentage = await couapnFind.discountPercentage;
+//   const cartTotalPrice = cart.totalPrice;
+
+//   // Calculate
+//   const discountAmount = (cartTotalPrice * couponDiscountPercentage) / 100;
+//   const priceAfterCouponDiscount = cartTotalPrice - discountAmount;
+
+
+
+
+
+//   // update cart
+//   cart.totalPrice = priceAfterCouponDiscount;
+//   cart.coupancode = coupon;
+//   cart.couapnDiscount = discountAmount;
+
+//   await cart.save();
+
+//   res.json({
+//     message: "coupon applied successfully",
+//     discountAmount,
+//     priceAfterCouponDiscount,
+//     cart,
+//   });
+// });
 const ApplyCoupon = TryCatch(async (req, res) => {
-  const { coupon } = req.body;
+  try {
+    const { coupon } = req.body;
 
-  const couapnFind = await Coupon.findOne({ Coupancode: coupon });
+    // Find the coupon in the database
+    const couponFind = await Coupon.findOne({ Coupancode: coupon });
 
-  if (!couapnFind) {
-    return res.status(400).json({
+    // If coupon is not found, return error
+    if (!couponFind) {
+      return res.status(400).json({
+        success: false,
+        message: "Coupon not found.",
+      });
+    }
+
+    // Check if the coupon is within the valid date range
+    const currentDate = new Date();
+    const startDate = new Date(couponFind.startDate);
+    const endDate = new Date(couponFind.endDate);
+
+    if (currentDate < startDate || currentDate > endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Coupon is expired or not valid at this time.",
+      });
+    }
+
+    // Find the active cart for the user
+    const cart = await Cart.findOne({
+      userId: req.user.id,
+      activecart: true,
+    });
+
+    if (!cart) {
+      return res.status(400).json({
+        success: false,
+        message: "No active cart found.",
+      });
+    }
+
+    const cartTotalPrice = cart.totalPrice;
+
+    // Handle coupon types
+    if (couponFind.coupanfor === "minimumOrderValue") {
+      const minimumOrderValue = couponFind.minimumOrderValue;
+      if (cartTotalPrice < minimumOrderValue) {
+        return res.status(400).json({
+          success: false,
+          message: `This coupon requires a minimum order value of ${minimumOrderValue}.`,
+        });
+      }
+    }
+
+    // Calculate discount
+    const couponDiscountPercentage = couponFind.discountPercentage;
+    const discountAmount = (cartTotalPrice * couponDiscountPercentage) / 100;
+    const priceAfterCouponDiscount = cartTotalPrice - discountAmount;
+
+    // Update the cart with the discounted price
+    cart.totalPrice = priceAfterCouponDiscount;
+    cart.coupancode = coupon;
+    cart.couapnDiscount = discountAmount;
+
+    await cart.save();
+
+    // Respond with the updated cart and discount details
+    return res.json({
+      success: true,
+      message: "Coupon applied successfully.",
+      discountAmount,
+      priceAfterCouponDiscount,
+      cart,
+    });
+  } catch (error) {
+    // Handle unexpected errors
+    return res.status(500).json({
       success: false,
-      message: "Coupon not found.",
+      message: "An error occurred while applying the coupon.",
     });
   }
-  const cart = await Cart.findOne({
-    userId: req.user.id,
-    activecart: "true",
-  });
-  const couponDiscountPercentage = await couapnFind.discountPercentage;
-  const cartTotalPrice = cart.totalPrice;
-
-  // Calculate
-  const discountAmount = (cartTotalPrice * couponDiscountPercentage) / 100;
-  const priceAfterCouponDiscount = cartTotalPrice - discountAmount;
-
-  // update cart
-  cart.totalPrice = priceAfterCouponDiscount;
-  cart.coupancode = coupon;
-  cart.couapnDiscount = discountAmount;
-
-  await cart.save();
-
-  res.json({
-    message: "coupon applied successfully",
-    discountAmount,
-    priceAfterCouponDiscount,
-    cart,
-  });
 });
+
 
 const RemoveCoupon = TryCatch(async (req, res) => {
   const cart = await Cart.findOne({
