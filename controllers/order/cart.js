@@ -183,6 +183,12 @@ const RemoveFromCart = TryCatch(async (req, res) => {
     cart.orderItems = processedItems;
     cart.totalPriceWithoutDiscount = PriceWithoutDiscount;
     cart.totalPrice = totalProductPrice;
+    if (cart.orderItems.length === 0) {
+      cart.coupancode = "";  
+      cart.couapnDiscount = 0; 
+      cart.totalPrice = 0;
+      cart.activecart = false;  
+    }
 
     // Save the updated cart
     await cart.save();
@@ -269,7 +275,7 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
   }
 });
 
-// couapn section
+// couapn section 
 const ApplyCoupon = TryCatch(async (req, res) => {
   const { coupon } = req.body;
 
