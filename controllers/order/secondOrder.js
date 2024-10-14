@@ -35,9 +35,9 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
     DeviceType,
   });
 
-  console.log("-=-=-=-=-=-=",secondorder)
+  console.log("-=-=-=-=-=-=", secondorder);
   const UserAdress = await ShipAddress.findById(secondorder.shippingAddress);
-  console.log("UserAdress",UserAdress)
+  console.log("UserAdress", UserAdress);
   // Extract order items from the cart
   const cart = await Cart.findById(CartId).populate("orderItems.productId");
   if (!cart) {
@@ -49,7 +49,7 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
 
   // Send mail
   const userEmail = req.user.email;
-  const orderDetails = generateOrderDetails(cart,secondorder,UserAdress);
+  const orderDetails = generateOrderDetails(cart, secondorder, UserAdress);
   const orderTotal = calculateOrderTotal(cart);
 
   Mail(
@@ -219,7 +219,7 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
 
 //   return detailsHtml;
 // }
-function generateOrderDetails(cart,secondorder,UserAdress) {
+function generateOrderDetails(cart, secondorder, UserAdress) {
   const logoUrl =
     "https://paliji-admin.vercel.app/static/media/logo.749613bd9100ee0b9f00.png";
   const shopName = "Palji Bakery";
@@ -258,19 +258,31 @@ function generateOrderDetails(cart,secondorder,UserAdress) {
       </div>`
     : "";
 
-  let totalHtml = `
+    let totalHtml = `
     <div style="background-color: #f9f9f9; padding: 10px; border-radius: 8px;">
       <h3 style="color: ${textColor};">Order Summary</h3>
-      <p style="color: #777;">Subtotal: ₹${cart.totalPriceWithoutDiscount}</p>
-      ${
-        totalDiscount > 0
-          ? `<p style="color: red;">Total Discount: -₹${totalDiscount}</p>`
-          : ""
-      }
-      <p style="font-weight: bold; color: ${textColor};">Total: ₹${
-    cart.totalPrice
-  }</p>
+      <div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
+          <div style="color: #777;">Subtotal:</div>
+          <div style="color: #777;">₹${cart.totalPriceWithoutDiscount}</div>
+        </div>
+
+        ${
+          totalDiscount > 0
+            ? `<div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
+                <div style="color: #777;">Total Discount:</div>
+                <div style="color: #777;">₹${totalDiscount}</div>
+              </div>`
+            : ""
+        }
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
+          <div style="font-weight: bold; color: ${textColor};">Total:</div>
+          <div style="font-weight: bold;">₹${cart.totalPrice}</div>
+        </div>
+      </div>
     </div>`;
+
 
   let shippingAddressHtml = `
     <div style="margin-top: 20px;">
@@ -296,8 +308,8 @@ function generateOrderDetails(cart,secondorder,UserAdress) {
           <h1 style="color: ${primaryColor};">${shopName}</h1>
           <p style="color: #666;">Collection of Best Taste</p>
         </div>
-        <hr style="border: none; height: 1px; background-color: #e0e0e0;">
-        <h2 style="color: ${textColor};">Order Confirmation</h2>
+        <hr style="border: none; height: 2px; background-color: ${primaryColor};">
+        <h2 style="color: #666;">Order Confirmation</h2>
         <p>Thank you for your order! We're excited to bake some delicious treats for you.</p>
         
         ${orderItemsHtml}
