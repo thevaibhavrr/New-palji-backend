@@ -55,7 +55,7 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   Mail(
     req.user.email,
     "Order Placed Successfully",
-    `Congratulations, your order has been placed successfully. Your order details: ${orderDetails} Total amount: ${orderTotal}`,
+    `${orderDetails}`,
     (isHTML = true)
   );
 
@@ -258,31 +258,30 @@ function generateOrderDetails(cart, secondorder, UserAdress) {
       </div>`
     : "";
 
-    let totalHtml = `
+  let totalHtml = `
     <div style="background-color: #f9f9f9; padding: 10px; border-radius: 8px;">
       <h3 style="color: ${textColor};">Order Summary</h3>
       <div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
-          <div style="color: #777;">Subtotal:</div>
-          <div style="color: #777;">₹${cart.totalPriceWithoutDiscount}</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding:0px 10px; width: 100%; ">
+          <div style="color: #777; width: 100%; ">Subtotal:</div>
+          <div style="color: #777; width: 30%; ">₹${cart.totalPriceWithoutDiscount}</div>
         </div>
 
         ${
           totalDiscount > 0
-            ? `<div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
-                <div style="color: #777;">Total Discount:</div>
-                <div style="color: #777;">₹${totalDiscount}</div>
+            ? `<div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 0px 10px; width: 100%;">
+                <div style="color: #777; width: 100%; ">Total Discount:</div>
+                <div style="color: #777; width: 30%; ">₹${totalDiscount}</div>
               </div>`
             : ""
         }
         
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px;">
-          <div style="font-weight: bold; color: ${textColor};">Total:</div>
-          <div style="font-weight: bold;">₹${cart.totalPrice}</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 0px 10px; width: 100%;  ">
+          <div style="font-weight: bold; color: ${textColor}; width: 100%; ">Total:</div>
+          <div style="font-weight: bold; color: ${textColor}; width: 30%; ">₹${cart.totalPrice}</div>
         </div>
       </div>
     </div>`;
-
 
   let shippingAddressHtml = `
     <div style="margin-top: 20px;">
@@ -324,7 +323,6 @@ function generateOrderDetails(cart, secondorder, UserAdress) {
 
         <div style="text-align: center; margin-top: 30px;">
           <p style="color: ${primaryColor};">Thank you for shopping with us!</p>
-          <p style="color: #777;">Your order will be freshly baked and shipped within 24 hours.</p>
           <a href="#" style="display: inline-block; background-color: ${primaryColor}; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Track Your Order</a>
         </div>
       </div>
