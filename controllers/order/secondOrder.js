@@ -127,13 +127,102 @@ const CreateSecondOrder = TryCatch(async (req, res, next) => {
   });
 });
 
+// function generateOrderDetails(cart) {
+//   const logoUrl =
+//     "https://paliji-admin.vercel.app/static/media/logo.749613bd9100ee0b9f00.png";
+//   const shopName = "Palji Bakery";
+//   const primaryColor = "#ff6f61";
+//   const backgroundColor = "#f7f7f7";
+//   const textColor = "black";
+//   const totalQuantity = cart.orderItems.reduce(
+//     (sum, item) => sum + item.quantity,
+//     0
+//   );
+//   const totalDiscount = cart.totalPriceWithoutDiscount - cart.totalPrice;
+
+//   let detailsHtml = `
+//     <div style="background-color: ${backgroundColor}; padding: 30px; font-family: Arial, sans-serif; line-height: 1.6;">
+//       <!-- Header with Logo and Shop Name -->
+//       <div style="text-align: center; margin-bottom: 20px;">
+//         <img src="${logoUrl}" alt="${shopName}" style="max-width: 180px; margin-bottom: 15px;">
+//         <h1 style="color: ${primaryColor}; font-size: 28px; font-weight: 700; margin: 10px 0;">${shopName}</h1>
+//         <p style="color: ${textColor}; font-size: 20px; font-weight: 600;">Congratulations, your order has been placed successfully!</p>
+//         <p style="color: #555; font-size: 18px; margin-bottom: 20px;">Your order details are below:</p>
+//       </div>
+
+//       <!-- Order Summary -->
+//       <h2 style="color: ${primaryColor}; text-align: left; border-bottom: 2px solid ${primaryColor}; padding-bottom: 10px; font-size: 24px; font-weight: 700;">Order Summary</h2>
+//       <div style="padding: 20px; border-radius: 10px; background-color: white; border: 1px solid #ccc; margin-bottom: 20px;">
+//         ${cart.orderItems
+//           .map(
+//             (item) => `
+//             <div class="order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee;">
+//               <div style="display: flex; align-items: center;">
+//                 <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="width: 80px; height: 80px; border-radius: 8px; margin-right: 15px; object-fit: cover;">
+//                 <div>
+//                   <div style="margin: 0; font-size: 18px; font-weight: 700; color: ${textColor};">${item.productId.name}</div>
+//                   <div style="color: #555; font-size: 14px; margin: 5px 0;">Quantity: ${item.quantity}</div>
+//                   <div style="font-size: 18px; color: ${primaryColor}; font-weight: 600;">₹${item.singleProductPrice}</div>
+//                 </div>
+//               </div>
+//             </div>
+//           `
+//           )
+//           .join("")}
+//       </div>
+
+//       <!-- Coupon and Discounts -->
+//       ${
+//         cart.coupancode
+//           ? `
+//         <div style="margin: 20px 0; padding: 20px; background-color: white; border-radius: 10px; border: 1px solid #ccc;">
+//           <p style="color: ${textColor}; font-size: 18px; font-weight: 600;"><strong>Coupon Code Applied:</strong> ${cart.coupancode}</p>
+//           <p style="color: ${textColor}; font-size: 18px; font-weight: 600;"><strong>Coupon Discount:</strong> ₹${cart.couapnDiscount}</p>
+//         </div>
+//       `
+//           : ""
+//       }
+
+//       <!-- Total Calculation -->
+//       <div style="padding: 20px; background-color: white; border-radius: 10px; border: 1px solid #ccc; margin-top: 20px;">
+//         <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Quantity: ${totalQuantity}</h3>
+//         <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Price Before Discount: ₹${cart.totalPriceWithoutDiscount}</h3>
+//         ${
+//           totalDiscount > 0
+//             ? `<h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Discount: ₹${totalDiscount}</h3>`
+//             : ""
+//         }
+//         <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Price: ₹${cart.totalPrice}</h3>
+//       </div>
+
+//       <!-- Thank You Message -->
+//       <div style="text-align: center; padding: 30px 0;">
+//         <p style="color: ${textColor}; font-size: 18px;">We appreciate your business and hope you enjoy your purchase!</p>
+//         <p style="color: ${textColor}; font-size: 18px;">Keep shopping at <strong>${shopName}</strong> for more delicious treats!</p>
+//       </div>
+
+//       <!-- Social Media Footer -->
+//       <div style="background-color: ${primaryColor}; padding: 15px; text-align: center; border-radius: 10px;">
+//         <h4 style="color: white; font-size: 18px; font-weight: 600; margin-bottom: 10px;">Follow Us</h4>
+//         <p style="color: white; font-size: 16px;">
+//           <a href="https://www.instagram.com/paljibakeryldh?igsh=eXV2bW12cmttdTg%3D" style="color: white; text-decoration: none; transition: color 0.3s;">Instagram</a> | 
+//           <a href="https://x.com/paljibakery?lang=en" style="color: white; text-decoration: none; transition: color 0.3s;">Twitter</a> | 
+//           <a href="https://www.facebook.com/paljibakery?_rdr" style="color: white; text-decoration: none; transition: color 0.3s;">Facebook</a>
+//         </p>
+//       </div>
+//     </div>
+//   `;
+
+//   return detailsHtml;
+// }
+
 function generateOrderDetails(cart) {
   const logoUrl =
     "https://paliji-admin.vercel.app/static/media/logo.749613bd9100ee0b9f00.png";
   const shopName = "Palji Bakery";
   const primaryColor = "#ff6f61";
   const backgroundColor = "#f7f7f7";
-  const textColor = "black";
+  const textColor = "#333";
   const totalQuantity = cart.orderItems.reduce(
     (sum, item) => sum + item.quantity,
     0
@@ -141,32 +230,32 @@ function generateOrderDetails(cart) {
   const totalDiscount = cart.totalPriceWithoutDiscount - cart.totalPrice;
 
   let detailsHtml = `
-    <div style="background-color: ${backgroundColor}; padding: 30px; font-family: Arial, sans-serif;">
+    <div style="background-color: ${backgroundColor}; padding: 40px; font-family: Arial, sans-serif; line-height: 1.6; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
       <!-- Header with Logo and Shop Name -->
-      <div style="text-align: center; margin-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
         <img src="${logoUrl}" alt="${shopName}" style="max-width: 180px; margin-bottom: 15px;">
-        <h1 style="color: ${primaryColor}; font-size: 28px; font-weight: 700;">${shopName}</h1>
+        <h1 style="color: ${primaryColor}; font-size: 32px; font-weight: bold; margin: 10px 0;">${shopName}</h1>
         <p style="color: ${textColor}; font-size: 20px; font-weight: 600;">Congratulations, your order has been placed successfully!</p>
         <p style="color: #555; font-size: 18px; margin-bottom: 20px;">Your order details are below:</p>
       </div>
 
       <!-- Order Summary -->
-      <h2 style="color: ${primaryColor}; text-align: left; border-bottom: 2px solid ${primaryColor}; padding-bottom: 10px; font-size: 24px; font-weight: 700;">Order Summary</h2>
-      <div style="padding: 20px 50px; border-bottom: 1px solid #ccc;">
+      <h2 style="color: ${primaryColor}; text-align: left; border-bottom: 2px solid ${primaryColor}; padding-bottom: 10px; font-size: 28px; font-weight: bold;">Order Summary</h2>
+      <div style="padding: 20px; border-radius: 10px; background-color: white; border: 1px solid #ccc; margin-bottom: 30px;">
         ${cart.orderItems
           .map(
             (item) => `
-          <div class="order-item" style="display: flex; justify-content: space-between; align-items: center; background-color: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-            <div style="display: flex; justify-content: space-evenly; align-items: center;">
-             <div>
-            <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="max-width: 100px; border-radius: 8px; margin-right: 20px;">
-               </div>
-              <div style="margin: 0; font-size: 20px; font-weight: 700; color: ${textColor};">${item.productId.name}</div>
-                <div style="color: #555; font-size: 16px; margin: 5px 0;">Quantity: ${item.quantity}</div>
+            <div class="order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee;">
+              <div style="display: flex; align-items: center;">
+                <img loading="lazy" src="${item.productId.thumbnail}" alt="${item.productId.name}" style="width: 80px; height: 80px; border-radius: 8px; margin-right: 15px; object-fit: cover;">
+                <div>
+                  <div style="margin: 0; font-size: 18px; font-weight: bold; color: ${textColor};">${item.productId.name}</div>
+                  <div style="color: #555; font-size: 14px; margin: 5px 0;">Quantity: ${item.quantity}</div>
+                  <div style="font-size: 18px; color: ${primaryColor}; font-weight: 600;">₹${item.singleProductPrice}</div>
+                </div>
+              </div>
             </div>
-            <div style="font-size: 18px; color: ${primaryColor}; font-weight: 600;">₹${item.singleProductPrice}</div>
-          </div>
-        `
+          `
           )
           .join("")}
       </div>
@@ -176,28 +265,24 @@ function generateOrderDetails(cart) {
         cart.coupancode
           ? `
         <div style="margin: 20px 0; padding: 20px; background-color: white; border-radius: 10px; border: 1px solid #ccc;">
-          <p style="color: ${textColor}; font-size: 18px; font-weight: 600;"><strong>Coupon Code Applied:</strong> ${cart.coupancode}</p>
-          <p style="color: ${textColor}; font-size: 18px; font-weight: 600;"><strong>Coupon Discount:</strong> ₹${cart.couapnDiscount}</p>
+          <p style="color: ${textColor}; font-size: 18px; font-weight: bold;"><strong>Coupon Code Applied:</strong> ${cart.coupancode}</p>
+          <p style="color: ${textColor}; font-size: 18px; font-weight: bold;"><strong>Coupon Discount:</strong> ₹${cart.couponDiscount}</p>
         </div>
       `
           : ""
       }
 
       <!-- Total Calculation -->
-      <div style="padding: 20px; background-color: white; border-radius: 10px; border: 1px solid #ccc; margin-top: 20px;">
-        <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Quantity: ${totalQuantity}</h3>
-        <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Price: ₹${
-    cart.totalPrice
-  }</h3>
-        <h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Price Before Discount: ₹${
-    cart.totalPriceWithoutDiscount
-  }</h3>
-        ${
-          totalDiscount > 0
-            ? `<h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: 700;">Total Discount: ₹${totalDiscount}</h3>`
-            : ""
-        }
-      </div>
+     <div style="padding: 20px; background-color: #f9f9f9; border-radius: 10px; border: 2px solid ${primaryColor}; margin-top: 30px;">
+  <h3 style="color: ${primaryColor}; text-align: right; font-size: 20px; font-weight: bold;">Total Quantity: <span style="color: ${textColor};">${totalQuantity}</span></h3>
+  <h3 style="color: ${primaryColor}; text-align: right; font-size: 20px; font-weight: bold;">Price Before Discount: <span>₹${cart.totalPriceWithoutDiscount}</span></h3>
+  ${
+    totalDiscount > 0
+      ? `<h3 style="color: ${textColor}; text-align: right; font-size: 20px; font-weight: bold;">Total Discount: <span style="color: red;">-₹${totalDiscount}</span></h3>`
+      : ""
+  }
+  <h3 style="color: ${primaryColor}; text-align: right; font-size: 20px; font-weight: bold;">Final Price: <span style="color: ${textColor};">₹${cart.totalPrice}</span></h3>
+</div>
 
       <!-- Thank You Message -->
       <div style="text-align: center; padding: 30px 0;">
@@ -206,12 +291,12 @@ function generateOrderDetails(cart) {
       </div>
 
       <!-- Social Media Footer -->
-      <div style="background-color: ${primaryColor}; padding: 15px; text-align: center; border-radius: 10px;">
-        <h4 style="color: white; font-size: 18px; font-weight: 600; margin-bottom: 10px;">Follow Us</h4>
+      <div style="background-color: ${primaryColor}; padding: 20px; text-align: center; border-radius: 10px; margin-top: 30px;">
+        <h4 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 10px;">Follow Us</h4>
         <p style="color: white; font-size: 16px;">
-          <a href="https://www.instagram.com/paljibakeryldh?igsh=eXV2bW12cmttdTg%3D" style="color: white; text-decoration: none;">Instagram</a> | 
-          <a href="https://x.com/paljibakery?lang=en" style="color: white; text-decoration: none;">Twitter</a> | 
-          <a href="https://www.facebook.com/paljibakery?_rdr" style="color: white; text-decoration: none;">Facebook</a>
+          <a href="https://www.instagram.com/paljibakeryldh?igsh=eXV2bW12cmttdTg%3D" style="color: white; text-decoration: none; transition: color 0.3s;">Instagram</a> | 
+          <a href="https://x.com/paljibakery?lang=en" style="color: white; text-decoration: none; transition: color 0.3s;">Twitter</a> | 
+          <a href="https://www.facebook.com/paljibakery?_rdr" style="color: white; text-decoration: none; transition: color 0.3s;">Facebook</a>
         </p>
       </div>
     </div>
@@ -219,6 +304,8 @@ function generateOrderDetails(cart) {
 
   return detailsHtml;
 }
+
+
 
 function calculateOrderTotal(cart) {
   return cart.orderItems.reduce(
