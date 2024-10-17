@@ -68,6 +68,17 @@ const addToCart = TryCatch(async (req, res, next) => {
     cart.totalPriceWithoutDiscount = PriceWithoutDiscount;
     cart.totalPrice = totalProductPrice;
 
+
+    if (cart.coupancode) {
+      const couponFind = await Coupon.findOne({ Coupancode: cart.coupancode });
+      if (couponFind) {
+        const couponDiscountPercentage = couponFind.discountPercentage;
+        const discountAmount = (cart.totalPrice * couponDiscountPercentage) / 100;
+        cart.couapnDiscount = discountAmount;
+        cart.totalPrice -= discountAmount;
+      }
+    }
+
     // Save the updated cart to the database
     await cart.save();
 
@@ -189,6 +200,15 @@ const RemoveFromCart = TryCatch(async (req, res) => {
       cart.totalPrice = 0;
       cart.activecart = false;
     }
+    if (cart.coupancode) {
+      const couponFind = await Coupon.findOne({ Coupancode: cart.coupancode });
+      if (couponFind) {
+        const couponDiscountPercentage = couponFind.discountPercentage;
+        const discountAmount = (cart.totalPrice * couponDiscountPercentage) / 100;
+        cart.couapnDiscount = discountAmount;
+        cart.totalPrice -= discountAmount;
+      }
+    }
 
     // Save the updated cart
     await cart.save();
@@ -257,6 +277,17 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
     cart.totalPriceWithoutDiscount = PriceWithoutDiscount;
     cart.totalPrice = totalProductPrice;
 
+
+    if (cart.coupancode) {
+      const couponFind = await Coupon.findOne({ Coupancode: cart.coupancode });
+      if (couponFind) {
+        const couponDiscountPercentage = couponFind.discountPercentage;
+        const discountAmount = (cart.totalPrice * couponDiscountPercentage) / 100;
+        cart.couapnDiscount = discountAmount;
+        cart.totalPrice -= discountAmount;
+      }
+    }
+
     // Save the updated cart
     await cart.save();
 
@@ -275,60 +306,6 @@ const DeleteProductFromCart = TryCatch(async (req, res) => {
   }
 });
 
-// couapn section
-// const ApplyCoupon = TryCatch(async (req, res) => {
-//   const { coupon } = req.body;
-
-//   const couapnFind = await Coupon.findOne({ Coupancode: coupon });
-
-//   const currentDate = new Date();
-//   const startDate = new Date(couapnFind.startDate);
-//   const endDate = new Date(couapnFind.endDate);
-
-//   if (!couapnFind) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "Coupon not found.",
-//     });
-//   }
-
-//   if (currentDate < startDate || currentDate > endDate) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "Coupon is expired or not valid at this time.",
-//     });
-//   }
-
-//   const cart = await Cart.findOne({
-//     userId: req.user.id,
-//     activecart: "true",
-//   });
-
-//   const couponDiscountPercentage = await couapnFind.discountPercentage;
-//   const cartTotalPrice = cart.totalPrice;
-
-//   // Calculate
-//   const discountAmount = (cartTotalPrice * couponDiscountPercentage) / 100;
-//   const priceAfterCouponDiscount = cartTotalPrice - discountAmount;
-
-
-
-
-
-//   // update cart
-//   cart.totalPrice = priceAfterCouponDiscount;
-//   cart.coupancode = coupon;
-//   cart.couapnDiscount = discountAmount;
-
-//   await cart.save();
-
-//   res.json({
-//     message: "coupon applied successfully",
-//     discountAmount,
-//     priceAfterCouponDiscount,
-//     cart,
-//   });
-// });
 const ApplyCoupon = TryCatch(async (req, res) => {
   try {
     const { coupon } = req.body;

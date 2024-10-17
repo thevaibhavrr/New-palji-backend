@@ -9,7 +9,6 @@ const CreateCoupan = TryCatch(async (req, res, next) => {
     coupan,
   });
 });
-// await Coupan.updateOne({ _id: coupan._id }, { Isexpired: true });
 
 
 const GetAllCoupan = TryCatch(async (req, res, next) => {
