@@ -69,6 +69,11 @@ class ApiFeatures {
     this.query = this.query.find(categoryFilter);
     return this;
   }
+  filterBySubcategory(subcategoryId) {
+    const subcategoryFilter = subcategoryId ? { subcategory: subcategoryId } : {};
+    this.query = this.query.find(subcategoryFilter);
+    return this;
+  }
 
   filterByStock(stock) {
     if (stock === 'true' || stock === true) {
