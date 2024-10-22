@@ -281,10 +281,10 @@ const GetAllProducts = Trycatch(async (req, res, next) => {
 
 // get single product
 const GetSingleProduct = Trycatch(async (req, res, next) => {
-  const product = await Product.findById(req.params.id).populate("category");
+  const product = await Product.findById(req.params.id).populate("category").populate("subcategory");
   
   if (!product) {
-    return res.status(404).json({
+    return res.status(404).json({ 
       success: false,
       message: "Product not found",
     });
